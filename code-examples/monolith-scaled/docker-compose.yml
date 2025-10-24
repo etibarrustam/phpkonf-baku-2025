@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8001:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app1
+      - app2
+      - app3
+    networks:
+      - plov-network
+
+  app1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - INSTANCE_ID=app-1
+      - DB_HOST=mysql
+      - DB_DATABASE=plov_express
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - REDIS_HOST=redis
+      - APP_KEY=base64:abcdefghijklmnopqrstuvwxyz123456789=
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - plov-network
+
+  app2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - INSTANCE_ID=app-2
+      - DB_HOST=mysql
+      - DB_DATABASE=plov_express
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - REDIS_HOST=redis
+      - APP_KEY=base64:abcdefghijklmnopqrstuvwxyz123456789=
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - plov-network
+
+  app3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - INSTANCE_ID=app-3
+      - DB_HOST=mysql
+      - DB_DATABASE=plov_express
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - REDIS_HOST=redis
+      - APP_KEY=base64:abcdefghijklmnopqrstuvwxyz123456789=
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - plov-network
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: plov_express
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - plov-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis-data:/data
+    networks:
+      - plov-network
+
+networks:
+  plov-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:

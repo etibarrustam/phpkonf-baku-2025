@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-order
+  labels:
+    app: mysql-order
+    tier: database
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3306
+    targetPort: 3306
+    protocol: TCP
+    name: mysql
+  selector:
+    app: mysql-order
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-payment
+  labels:
+    app: mysql-payment
+    tier: database
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3306
+    targetPort: 3306
+    protocol: TCP
+    name: mysql
+  selector:
+    app: mysql-payment
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-kitchen
+  labels:
+    app: mysql-kitchen
+    tier: database
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3306
+    targetPort: 3306
+    protocol: TCP
+    name: mysql
+  selector:
+    app: mysql-kitchen
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-delivery
+  labels:
+    app: mysql-delivery
+    tier: database
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3306
+    targetPort: 3306
+    protocol: TCP
+    name: mysql
+  selector:
+    app: mysql-delivery
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    app: redis
+    tier: cache
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol: TCP
+    name: redis
+  selector:
+    app: redis

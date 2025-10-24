@@ -1,0 +1,41 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: microservices-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: microservices.local
+    http:
+      paths:
+      - path: /order(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: order-service
+            port:
+              number: 80
+      - path: /payment(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: payment-service
+            port:
+              number: 80
+      - path: /kitchen(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: kitchen-service
+            port:
+              number: 80
+      - path: /delivery(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: delivery-service
+            port:
+              number: 80

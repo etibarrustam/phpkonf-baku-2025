@@ -1,0 +1,15 @@
+vendor/
+.env
+storage/logs/*.log
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.sql.gz
+*.log

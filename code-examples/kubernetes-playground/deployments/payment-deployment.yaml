@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  labels:
+    app: payment-service
+    tier: application
+spec:
+  replicas: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+        tier: application
+    spec:
+      containers:
+      - name: payment-service
+        image: php:8.2-apache
+        ports:
+        - containerPort: 80
+          name: http
+        env:
+        - name: DB_HOST
+          value: mysql-payment
+        - name: DB_DATABASE
+          value: payment_db
+        - name: DB_USERNAME
+          value: root
+        - name: DB_PASSWORD
+          value: root
+        - name: REDIS_HOST
+          value: redis
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        volumeMounts:
+        - name: payment-service-code
+          mountPath: /var/www/html
+      volumes:
+      - name: payment-service-code
+        configMap:
+          name: payment-service-config

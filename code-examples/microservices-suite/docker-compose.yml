@@ -1,0 +1,156 @@
+version: '3.8'
+
+services:
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    ports:
+      - "8005:8001"
+    environment:
+      - APP_ENV=dev
+      - DATABASE_URL=mysql://root:rootpassword@order-db:3306/order_service?serverVersion=8.0
+      - PAYMENT_SERVICE_URL=http://payment-service:8002
+      - KITCHEN_SERVICE_URL=http://kitchen-service:8003
+      - DELIVERY_SERVICE_URL=http://delivery-service:8004
+    depends_on:
+      order-db:
+        condition: service_healthy
+      payment-service:
+        condition: service_started
+      kitchen-service:
+        condition: service_started
+      delivery-service:
+        condition: service_started
+    networks:
+      - microservices-network
+
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - APP_ENV=local
+      - DB_CONNECTION=mysql
+      - DB_HOST=payment-db
+      - DB_PORT=3306
+      - DB_DATABASE=payment_service
+      - DB_USERNAME=root
+      - DB_PASSWORD=rootpassword
+    depends_on:
+      payment-db:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+  kitchen-service:
+    build:
+      context: ./kitchen-service
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      - APP_ENV=local
+      - DB_CONNECTION=mysql
+      - DB_HOST=kitchen-db
+      - DB_PORT=3306
+      - DB_DATABASE=kitchen_service
+      - DB_USERNAME=root
+      - DB_PASSWORD=rootpassword
+    depends_on:
+      kitchen-db:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+  delivery-service:
+    build:
+      context: ./delivery-service
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8004"
+    environment:
+      - APP_ENV=local
+      - DB_CONNECTION=mysql
+      - DB_HOST=delivery-db
+      - DB_PORT=3306
+      - DB_DATABASE=delivery_service
+      - DB_USERNAME=root
+      - DB_PASSWORD=rootpassword
+    depends_on:
+      delivery-db:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+  order-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: order_service
+    volumes:
+      - order-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - microservices-network
+
+  payment-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: payment_service
+    volumes:
+      - payment-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - microservices-network
+
+  kitchen-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: kitchen_service
+    volumes:
+      - kitchen-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - microservices-network
+
+  delivery-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: delivery_service
+    volumes:
+      - delivery-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - microservices-network
+
+volumes:
+  order-db-data:
+  payment-db-data:
+  kitchen-db-data:
+  delivery-db-data:
+
+networks:
+  microservices-network:
+    driver: bridge

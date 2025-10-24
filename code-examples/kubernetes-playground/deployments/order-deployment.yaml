@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  labels:
+    app: order-service
+    tier: application
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+        tier: application
+    spec:
+      containers:
+      - name: order-service
+        image: php:8.2-apache
+        ports:
+        - containerPort: 80
+          name: http
+        env:
+        - name: DB_HOST
+          value: mysql-order
+        - name: DB_DATABASE
+          value: order_db
+        - name: DB_USERNAME
+          value: root
+        - name: DB_PASSWORD
+          value: root
+        - name: PAYMENT_SERVICE_URL
+          value: http://payment-service
+        - name: KITCHEN_SERVICE_URL
+          value: http://kitchen-service
+        - name: REDIS_HOST
+          value: redis
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        volumeMounts:
+        - name: order-service-code
+          mountPath: /var/www/html
+      volumes:
+      - name: order-service-code
+        configMap:
+          name: order-service-config

@@ -1,0 +1,43 @@
+services:
+  app:
+    image: php:8.2-apache
+    ports:
+      - "8000:80"
+    environment:
+      - DB_HOST=mysql
+      - DB_DATABASE=plov_express
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - plov-network
+    volumes:
+      - ./index.php:/var/www/html/index.php
+    command: >
+      bash -c "docker-php-ext-install pdo pdo_mysql && apache2-foreground"
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: plov_express
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - plov-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+
+networks:
+  plov-network:
+    driver: bridge
+
+volumes:
+  mysql-data:

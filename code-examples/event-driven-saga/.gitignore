@@ -1,0 +1,11 @@
+vendor/
+.env
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.sql.gz
+*.log
+node_modules/

@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - event-driven
+
+  mysql-order:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: order_db
+    volumes:
+      - ./mysql-init/order.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - event-driven
+
+  mysql-payment:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: payment_db
+    volumes:
+      - ./mysql-init/payment.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - event-driven
+
+  mysql-kitchen:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: kitchen_db
+    volumes:
+      - ./mysql-init/kitchen.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - event-driven
+
+  mysql-delivery:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: delivery_db
+    volumes:
+      - ./mysql-init/delivery.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - event-driven
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "8001:80"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mysql-order:
+        condition: service_healthy
+    networks:
+      - event-driven
+
+  payment-service:
+    build: ./payment-service
+    ports:
+      - "8002:80"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mysql-payment:
+        condition: service_healthy
+    networks:
+      - event-driven
+
+  kitchen-service:
+    build: ./kitchen-service
+    ports:
+      - "8003:80"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mysql-kitchen:
+        condition: service_healthy
+    networks:
+      - event-driven
+
+  delivery-service:
+    build: ./delivery-service
+    ports:
+      - "8004:80"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mysql-delivery:
+        condition: service_healthy
+    networks:
+      - event-driven
+
+networks:
+  event-driven:
+    driver: bridge
