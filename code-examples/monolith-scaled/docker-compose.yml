@@ -25,7 +25,7 @@ services:
       - DB_USERNAME=root
       - DB_PASSWORD=secret
       - REDIS_HOST=redis
-      - APP_KEY=base64:abcdefghijklmnopqrstuvwxyz123456789=
+      - APP_KEY=base64:gGIjXyEkPJtxxRDAuCm/pk6GHQ83KdYDbPtn4oNjr5Y=
       - CACHE_DRIVER=redis
       - SESSION_DRIVER=redis
     depends_on:
@@ -47,7 +47,7 @@ services:
       - DB_USERNAME=root
       - DB_PASSWORD=secret
       - REDIS_HOST=redis
-      - APP_KEY=base64:abcdefghijklmnopqrstuvwxyz123456789=
+      - APP_KEY=base64:gGIjXyEkPJtxxRDAuCm/pk6GHQ83KdYDbPtn4oNjr5Y=
       - CACHE_DRIVER=redis
       - SESSION_DRIVER=redis
     depends_on:
@@ -69,7 +69,7 @@ services:
       - DB_USERNAME=root
       - DB_PASSWORD=secret
       - REDIS_HOST=redis
-      - APP_KEY=base64:abcdefghijklmnopqrstuvwxyz123456789=
+      - APP_KEY=base64:gGIjXyEkPJtxxRDAuCm/pk6GHQ83KdYDbPtn4oNjr5Y=
       - CACHE_DRIVER=redis
       - SESSION_DRIVER=redis
     depends_on:
