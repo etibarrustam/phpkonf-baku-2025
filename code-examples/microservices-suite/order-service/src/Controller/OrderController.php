@@ -14,7 +14,10 @@ class OrderController extends AbstractController
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private Client $httpClient = new Client(['timeout' => 5])
+        private Client $httpClient = new Client(['timeout' => 5]),
+        private string $paymentServiceUrl = '',
+        private string $kitchenServiceUrl = '',
+        private string $deliveryServiceUrl = ''
     ) {}
 
     #[Route('/health', methods: ['GET'])]
@@ -45,7 +48,7 @@ class OrderController extends AbstractController
         $this->entityManager->flush();
 
         try {
-            $paymentResponse = $this->httpClient->post($_ENV['PAYMENT_SERVICE_URL'] . '/payments', [
+            $paymentResponse = $this->httpClient->post($this->paymentServiceUrl . '/api/payments', [
                 'json' => [
                     'order_id' => $order->getId(),
                     'amount' => $order->getTotalAmount()
@@ -55,7 +58,7 @@ class OrderController extends AbstractController
             $order->setPaymentId($paymentData['id']);
             $order->setStatus('payment_processed');
 
-            $kitchenResponse = $this->httpClient->post($_ENV['KITCHEN_SERVICE_URL'] . '/kitchen/prepare', [
+            $kitchenResponse = $this->httpClient->post($this->kitchenServiceUrl . '/api/kitchen/prepare', [
                 'json' => [
                     'order_id' => $order->getId(),
                     'items' => $data['items']
@@ -65,7 +68,7 @@ class OrderController extends AbstractController
             $order->setKitchenId($kitchenData['id']);
             $order->setStatus('preparing');
 
-            $deliveryResponse = $this->httpClient->post($_ENV['DELIVERY_SERVICE_URL'] . '/deliveries', [
+            $deliveryResponse = $this->httpClient->post($this->deliveryServiceUrl . '/api/deliveries', [
                 'json' => [
                     'order_id' => $order->getId(),
                     'customer_name' => $order->getCustomerName()

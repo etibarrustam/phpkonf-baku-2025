@@ -48,15 +48,15 @@ if [ ! -z "$ORDER_ID" ]; then
   echo ""
 
   echo "list payments"
-  curl -s http://localhost:8002/payments | jq '.'
+  curl -s http://localhost:8002/api/payments | jq '.'
   echo ""
 
   echo "list kitchen"
-  curl -s http://localhost:8003/kitchen | jq '.'
+  curl -s http://localhost:8003/api/kitchen | jq '.'
   echo ""
 
   echo "list deliveries"
-  curl -s http://localhost:8004/deliveries | jq '.'
+  curl -s http://localhost:8004/api/deliveries | jq '.'
   echo ""
 fi
 

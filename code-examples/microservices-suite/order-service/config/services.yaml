@@ -1,4 +1,7 @@
 parameters:
+    payment_service_url: '%env(PAYMENT_SERVICE_URL)%'
+    kitchen_service_url: '%env(KITCHEN_SERVICE_URL)%'
+    delivery_service_url: '%env(DELIVERY_SERVICE_URL)%'
 
 services:
     _defaults:
@@ -15,3 +18,9 @@ services:
     App\Controller\:
         resource: '../src/Controller/'
         tags: ['controller.service_arguments']
+
+    App\Controller\OrderController:
+        arguments:
+            $paymentServiceUrl: '%payment_service_url%'
+            $kitchenServiceUrl: '%kitchen_service_url%'
+            $deliveryServiceUrl: '%delivery_service_url%'

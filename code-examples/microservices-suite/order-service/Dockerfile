@@ -17,6 +17,7 @@ COPY . .
 RUN composer dump-autoload --optimize
 
 RUN chmod +x bin/console
+RUN chown -R www-data:www-data /var/www/html
 
 RUN apt-get update && apt-get install -y nginx && apt-get clean
 
